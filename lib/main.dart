@@ -1,306 +1,209 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 void main() => runApp(const CampusCareApp());
 
 class CampusCareApp extends StatelessWidget {
   const CampusCareApp({super.key});
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'CampusCare',
+        theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF08BDBA)),
+        home: const LoginPage(),
+      );
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
+  final email = TextEditingController();
+  final password = TextEditingController();
+  final name = TextEditingController();
+  late final AnimationController animation;
+  bool register = false;
+  bool showPassword = false;
+  bool remember = false;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'CampusCare',
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF0E7490)),
-      home: const AuthPage(),
-    );
+  void initState() {
+    super.initState();
+    animation = AnimationController(vsync: this, duration: const Duration(seconds: 8))..repeat();
   }
-}
-
-class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
-
-  @override
-  State<AuthPage> createState() => _AuthPageState();
-}
-
-class _AuthPageState extends State<AuthPage> {
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  bool isRegister = false;
-  bool hidePassword = true;
 
   @override
   void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
+    animation.dispose();
+    email.dispose();
+    password.dispose();
+    name.dispose();
     super.dispose();
   }
 
   void submit() {
-    if (emailController.text.trim().isEmpty ||
-        passwordController.text.isEmpty ||
-        (isRegister && nameController.text.trim().isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
-      );
+    if (email.text.trim().isEmpty || password.text.isEmpty || (register && name.text.trim().isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please complete all required fields')));
       return;
     }
-
-    if (isRegister) {
-      setState(() => isRegister = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration successful! Please login.')),
-      );
+    if (register) {
+      setState(() => register = false);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful. Please login.')));
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF083344), Color(0xFF0E7490), Color(0xFF67E8F9)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: AnimatedBuilder(
+        animation: animation,
+        builder: (_, __) => Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(colors: [Color(0xFFE9FCFF), Color(0xFFBFF7F4)], begin: Alignment.topLeft, end: Alignment.bottomRight),
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Card(
-              elevation: 18,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              child: Padding(
-                padding: const EdgeInsets.all(28),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircleAvatar(
-                      radius: 44,
-                      backgroundColor: Color(0xFFE0F2FE),
-                      child: Icon(Icons.school, size: 48, color: Color(0xFF0E7490)),
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      isRegister ? 'Create your account' : 'Welcome back!',
-                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(isRegister ? 'Join your campus journey' : 'Your smart student companion'),
-                    const SizedBox(height: 24),
-                    if (isRegister) ...[
-                      TextField(
-                        controller: nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Full name',
-                          prefixIcon: Icon(Icons.person),
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    TextField(
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email address',
-                        prefixIcon: Icon(Icons.email),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: passwordController,
-                      obscureText: hidePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock),
-                        border: const OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                          onPressed: () => setState(() => hidePassword = !hidePassword),
-                          icon: Icon(hidePassword ? Icons.visibility : Icons.visibility_off),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: FilledButton.icon(
-                        onPressed: submit,
-                        icon: Icon(isRegister ? Icons.person_add : Icons.login),
-                        label: Text(isRegister ? 'Register' : 'Login'),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () => setState(() => isRegister = !isRegister),
-                      child: Text(isRegister ? 'Already have an account? Login' : 'New user? Register'),
-                    ),
-                    const Text('Demo app • No real account is created', style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-              ),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 850;
+              return Row(children: [
+                if (wide) Expanded(flex: 11, child: _creativePanel(animation.value)),
+                Expanded(flex: 10, child: _loginPanel()),
+              ]);
+            },
           ),
         ),
       ),
     );
   }
-}
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int selectedIndex = 0;
-  final tasks = <String>['Complete Flutter assignment', 'Revise Computer Networks'];
-  final completed = <bool>[false, false];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0FDFA),
-      body: SafeArea(
-        child: Row(
-          children: [
-            NavigationRail(
-              selectedIndex: selectedIndex,
-              labelType: NavigationRailLabelType.all,
-              onDestinationSelected: (index) => setState(() => selectedIndex = index),
-              destinations: const [
-                NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
-                NavigationRailDestination(icon: Icon(Icons.task), label: Text('Tasks')),
-                NavigationRailDestination(icon: Icon(Icons.calendar_month), label: Text('Planner')),
-                NavigationRailDestination(icon: Icon(Icons.person), label: Text('Profile')),
-                NavigationRailDestination(icon: Icon(Icons.more_horiz), label: Text('More')),
-              ],
-            ),
-            Expanded(child: _page()),
-          ],
-        ),
-      ),
-      floatingActionButton: selectedIndex == 1
-          ? FloatingActionButton.extended(onPressed: addTask, icon: const Icon(Icons.add), label: const Text('Add task'))
-          : null,
-    );
-  }
-
-  Widget _page() {
-    switch (selectedIndex) {
-      case 1:
-        return taskPage();
-      case 2:
-        return simplePage('Study Planner', ['08:00 AM • Data Structures', '10:00 AM • DBMS', '02:00 PM • Flutter practice']);
-      case 3:
-        return simplePage('Student Profile', ['Name: Harshini Mandru', 'Department: CSE', 'College: LBRCE']);
-      case 4:
-        return simplePage('More', ['Notifications', 'Achievements', 'Help and Support', 'Settings']);
-      default:
-        return dashboard();
-    }
-  }
-
-  Widget dashboard() {
-    return ListView(
-      padding: const EdgeInsets.all(28),
+  Widget _creativePanel(double value) {
+    return Stack(
       children: [
-        const Text('Good morning, Harshini 👋', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        const Text('Your campus, your success.'),
-        const SizedBox(height: 24),
         Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFF0E7490), Color(0xFF14B8A6)]),
-            borderRadius: BorderRadius.circular(26),
+          padding: const EdgeInsets.fromLTRB(48, 42, 24, 24),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(colors: [Color(0xFFDAFAFF), Color(0xFF8CE8F0)], begin: Alignment.topLeft, end: Alignment.bottomRight),
           ),
-          child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('CAMPUSCARE', style: TextStyle(color: Colors.white70, letterSpacing: 3)),
-            SizedBox(height: 12),
-            Text('Learn. Connect. Grow.', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: const [
+              CircleAvatar(radius: 25, backgroundColor: Color(0xFF064E75), child: Icon(Icons.school, color: Colors.white, size: 30)),
+              SizedBox(width: 12),
+              Text('Campus', style: TextStyle(fontSize: 31, fontWeight: FontWeight.w800, color: Color(0xFF164E7A))),
+              Text('Care', style: TextStyle(fontSize: 31, fontWeight: FontWeight.w800, color: Color(0xFF08BDBA))),
+            ]),
+            const SizedBox(height: 5),
+            const Padding(padding: EdgeInsets.only(left: 63), child: Text('Learn  •  Plan  •  Grow', style: TextStyle(fontSize: 15, color: Color(0xFF2563A6)))),
+            const Spacer(),
+            const Text('Your Campus Life', style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: Color(0xFF174B7D))),
+            const Text('Made Easier', style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: Color(0xFF08BDBA))),
+            const SizedBox(height: 15),
+            const SizedBox(width: 370, child: Text('Access your classes, plan your studies, track your goals and build a better tomorrow — all in one place.', style: TextStyle(fontSize: 16, height: 1.5, color: Color(0xFF285C91)))),
+            const SizedBox(height: 22),
+            _feature(Icons.menu_book_rounded, 'Study Planner'),
+            _feature(Icons.calendar_month_rounded, 'Track Progress'),
+            _feature(Icons.people_alt_rounded, 'Student Profile'),
+            _feature(Icons.notifications_active_rounded, 'Smart Reminders'),
+            const Spacer(),
+            Center(child: Transform.translate(offset: Offset(0, math.sin(value * math.pi * 2) * 10), child: _studentIllustration())),
           ]),
         ),
-        const SizedBox(height: 24),
-        const Text('Today’s focus', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        ...tasks.asMap().entries.map((entry) => CheckboxListTile(
-              value: completed[entry.key],
-              onChanged: (value) => setState(() => completed[entry.key] = value ?? false),
-              title: Text(entry.value),
-            )),
+        Positioned(top: 55, right: 40, child: _bubble(58, const Color(0xFF12C9C1), value)),
+        Positioned(top: 170, right: 100, child: _bubble(28, const Color(0xFF0784C6), value + .3)),
+        Positioned(bottom: 110, right: 35, child: _bubble(42, const Color(0xFF19BFD8), value + .6)),
       ],
     );
   }
 
-  Widget taskPage() {
-    return ListView(
-      padding: const EdgeInsets.all(28),
-      children: [
-        const Text('My Tasks', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 20),
-        ...tasks.asMap().entries.map((entry) => Card(
-              child: ListTile(
-                title: Text(entry.value),
-                leading: Icon(completed[entry.key] ? Icons.check_circle : Icons.task_alt),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => setState(() {
-                    tasks.removeAt(entry.key);
-                    completed.removeAt(entry.key);
-                  }),
-                ),
-              ),
-            )),
-      ],
-    );
-  }
+  Widget _feature(IconData icon, String text) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(children: [
+          Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white.withOpacity(.7), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: const Color(0xFF087EA4))),
+          const SizedBox(width: 13),
+          Text(text, style: const TextStyle(fontSize: 16, color: Color(0xFF245D91))),
+        ]),
+      );
 
-  Widget simplePage(String title, List<String> items) {
-    return ListView(
-      padding: const EdgeInsets.all(28),
-      children: [
-        Text(title, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 20),
-        ...items.map((item) => Card(child: ListTile(title: Text(item)))),
-      ],
-    );
-  }
+  Widget _studentIllustration() => Container(
+        width: 290,
+        height: 180,
+        decoration: BoxDecoration(color: Colors.white.withOpacity(.38), borderRadius: BorderRadius.circular(100)),
+        child: Stack(alignment: Alignment.center, children: [
+          Positioned(bottom: 10, child: Container(width: 235, height: 45, decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(12)))),
+          Positioned(bottom: 48, child: Container(width: 220, height: 35, decoration: BoxDecoration(color: const Color(0xFF14B8A6), borderRadius: BorderRadius.circular(12)))),
+          const Positioned(top: 18, child: CircleAvatar(radius: 35, backgroundColor: Color(0xFFF4B183), child: Icon(Icons.face_rounded, size: 52, color: Color(0xFF4B2E20)))),
+          Positioned(top: 74, child: Container(width: 90, height: 85, decoration: BoxDecoration(color: const Color(0xFF0E7490), borderRadius: BorderRadius.circular(30)), child: const Icon(Icons.laptop_mac, size: 58, color: Colors.white))),
+          const Positioned(top: 0, right: 24, child: Icon(Icons.school, size: 55, color: Color(0xFF164E7A))),
+        ]),
+      );
 
-  void addTask() {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Add task'),
-        content: TextField(controller: controller, decoration: const InputDecoration(hintText: 'Task name')),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                setState(() {
-                  tasks.add(controller.text.trim());
-                  completed.add(false);
-                });
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('Add'),
+  Widget _bubble(double size, Color color, double phase) => Transform.translate(
+        offset: Offset(math.sin(phase * math.pi * 2) * 14, math.cos(phase * math.pi * 2) * 12),
+        child: Container(width: size, height: size, decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [color.withOpacity(.95), Colors.white.withOpacity(.4)]), boxShadow: const [BoxShadow(blurRadius: 15, color: Colors.white)])),
+      );
+
+  Widget _loginPanel() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(28),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 470),
+          child: Card(
+            elevation: 22,
+            shadowColor: const Color(0x5500788B),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+            child: Padding(
+              padding: const EdgeInsets.all(34),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Center(child: Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFFE0FBFA), border: Border.all(color: const Color(0xFF65E5E0), width: 2)), child: const Icon(Icons.school, size: 48, color: Color(0xFF087EA4)))),
+                const SizedBox(height: 18),
+                Center(child: Text(register ? 'Create Account ✨' : 'Welcome Back 👋', style: const TextStyle(fontSize: 29, fontWeight: FontWeight.bold, color: Color(0xFF123A65)))),
+                const SizedBox(height: 8),
+                Center(child: Text(register ? 'Start your campus journey' : 'Login to your CampusCare account', style: const TextStyle(color: Color(0xFF5D83AA), fontSize: 15))),
+                const SizedBox(height: 28),
+                if (register) ...[_label('Full Name'), _field(name, Icons.person_outline, 'Enter your name'), const SizedBox(height: 16)],
+                _label('Email Address'),
+                _field(email, Icons.email_outlined, 'Enter your email', type: TextInputType.emailAddress),
+                const SizedBox(height: 16),
+                _label('Password'),
+                _field(password, Icons.lock_outline, 'Enter your password', obscure: !showPassword, suffix: IconButton(onPressed: () => setState(() => showPassword = !showPassword), icon: Icon(showPassword ? Icons.visibility_off : Icons.visibility))),
+                const SizedBox(height: 8),
+                Row(children: [Checkbox(value: remember, onChanged: (v) => setState(() => remember = v ?? false)), const Text('Remember me'), const Spacer(), TextButton(onPressed: () {}, child: const Text('Forgot password?'))]),
+                const SizedBox(height: 12),
+                SizedBox(width: double.infinity, height: 54, child: FilledButton.icon(onPressed: submit, icon: Icon(register ? Icons.person_add : Icons.arrow_forward), label: Text(register ? 'Register' : 'Login', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)))),
+                const SizedBox(height: 18),
+                Row(children: const [Expanded(child: Divider()), Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('OR')), Expanded(child: Divider())]),
+                const SizedBox(height: 16),
+                SizedBox(width: double.infinity, height: 50, child: OutlinedButton.icon(onPressed: () {}, icon: const Icon(Icons.g_mobiledata, size: 30, color: Colors.red), label: const Text('Continue with Google')),
+                const SizedBox(height: 20),
+                Center(child: TextButton(onPressed: () => setState(() => register = !register), child: Text(register ? 'Already have an account? Login →' : 'Don’t have an account? Register →'))),
+                const Center(child: Text('Demo app • No real account is created', style: TextStyle(fontSize: 11, color: Colors.grey))),
+              ]),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
+
+  Widget _label(String text) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF24598D))));
+
+  Widget _field(TextEditingController controller, IconData icon, String hint, {TextInputType? type, bool obscure = false, Widget? suffix}) => TextField(
+        controller: controller,
+        keyboardType: type,
+        obscureText: obscure,
+        decoration: InputDecoration(hintText: hint, prefixIcon: Icon(icon, color: const Color(0xFF326A9C)), suffixIcon: suffix, filled: true, fillColor: const Color(0xFFF4FCFF), border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Color(0xFFB8DCEB))), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Color(0xFFB8DCEB))), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Color(0xFF08BDBA), width: 2))),
+      );
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('CampusCare'), backgroundColor: const Color(0xFFBFF7F4)),
+        body: const Center(child: Text('Welcome to CampusCare 🎓', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold))),
+      );
 }
