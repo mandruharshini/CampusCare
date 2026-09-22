@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: campuscare
+    runtime: static
+    buildCommand: |
+      git clone --depth 1 --branch stable https://github.com/flutter/flutter.git $HOME/flutter
+      export PATH="$HOME/flutter/bin:$HOME/flutter/bin/cache/dart-sdk/bin:$PATH"
+      flutter precache --web
+      flutter create . --platforms=web
+      flutter pub get
+      flutter build web --release
+    staticPublishPath: build/web
+    branch: main
+    autoDeploy: true
